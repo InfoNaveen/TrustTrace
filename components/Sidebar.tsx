@@ -12,7 +12,8 @@ import {
   Settings,
   ChevronLeft,
   Shield,
-  Activity
+  Activity,
+  FlaskConical
 } from 'lucide-react';
 import { sidebarVariants, fadeIn } from '@/lib/motion';
 
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Scan Results', href: '/scan-results', icon: ShieldAlert },
   { name: 'Security Timeline', href: '/timeline', icon: Clock },
   { name: 'Patches', href: '/patches', icon: Wrench },
+  { name: 'TrustTrace', href: '/trusttrace', icon: FlaskConical },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -73,11 +75,11 @@ export function Sidebar({
                   className="flex items-center space-x-3"
                 >
                   <div className="relative">
-                    <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-lg" />
-                    <Shield className="h-8 w-8 text-cyan-400 relative z-10" />
+                    <div className="absolute inset-0 bg-brand-secondary/20 blur-xl rounded-lg" />
+                    <Shield className="h-8 w-8 text-brand-secondary relative z-10" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    <h1 className="text-xl font-bold bg-gradient-to-r from-brand-secondary to-brand-primary bg-clip-text text-transparent">
                       DevSentinel
                     </h1>
                     <p className="text-xs text-gray-400">AI Security Platform</p>
@@ -93,8 +95,8 @@ export function Sidebar({
                   className="flex items-center justify-center w-full"
                 >
                   <div className="relative">
-                    <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-lg" />
-                    <Shield className="h-8 w-8 text-cyan-400 relative z-10" />
+                    <div className="absolute inset-0 bg-brand-secondary/20 blur-xl rounded-lg" />
+                    <Shield className="h-8 w-8 text-brand-secondary relative z-10" />
                   </div>
                 </motion.div>
               )}
@@ -124,21 +126,21 @@ export function Sidebar({
                     href={item.href}
                     className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-microsoft-blue text-white border border-transparent shadow-lg'
+                        ? 'bg-white/5 text-white border-l-4 border-brand-secondary shadow-lg'
                         : 'text-gray-400 hover:text-white hover:bg-gray-700/50 border border-transparent'
                     }`}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-r-full"
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-brand-secondary rounded-r-full"
                         initial={false}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
                     )}
                     <item.icon
                       className={`flex-shrink-0 h-5 w-5 ${
-                        isActive ? 'text-cyan-400' : 'text-gray-500 group-hover:text-cyan-400'
+                        isActive ? 'text-brand-secondary' : 'text-gray-500 group-hover:text-brand-secondary'
                       } transition-colors`}
                     />
                     <AnimatePresence>
@@ -156,7 +158,7 @@ export function Sidebar({
                     </AnimatePresence>
                     {isActive && (
                       <motion.div
-                        className="absolute right-2 w-2 h-2 bg-cyan-400 rounded-full"
+                        className="absolute right-2 w-2 h-2 bg-brand-secondary rounded-full"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -179,16 +181,16 @@ export function Sidebar({
                   className="flex items-center space-x-3 p-3 rounded-lg bg-gray-700/50 border border-gray-600/30"
                 >
                   <div className="relative">
-                    <Activity className="h-4 w-4 text-green-400" />
+                    <Activity className="h-4 w-4 text-brand-secondary" />
                     <motion.div
-                      className="absolute inset-0 bg-green-400 rounded-full"
+                      className="absolute inset-0 bg-brand-secondary rounded-full"
                       animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-green-400">System Active</p>
-                    <p className="text-xs text-gray-500 truncate">All systems operational</p>
+                    <p className="text-xs font-medium text-brand-secondary">Pipeline Active</p>
+                    <p className="text-xs text-gray-500 truncate">Sentinel scanning...</p>
                   </div>
                 </motion.div>
               ) : (
@@ -199,9 +201,9 @@ export function Sidebar({
                   className="flex items-center justify-center"
                 >
                   <div className="relative">
-                    <Activity className="h-5 w-5 text-green-400" />
+                    <Activity className="h-5 w-5 text-brand-secondary" />
                     <motion.div
-                      className="absolute inset-0 bg-green-400 rounded-full"
+                      className="absolute inset-0 bg-brand-secondary rounded-full"
                       animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
