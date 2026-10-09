@@ -343,3 +343,58 @@ All rights reserved. This project was created for the **Techfest IIT Bombay Auto
 - [Next.js](https://nextjs.org/) — React application framework
 - [shadcn/ui](https://ui.shadcn.com/) — Component library
 - [LangChain / AutoGen](https://www.langchain.com/) — Agentic workflow concepts
+
+---
+
+## TrustTrace — Security-Testing Backend Module
+
+TrustTrace is a standalone security-testing backend module added to DevSentinel AI. It runs a tool-using agent against controlled repository fixtures and measures — from actual tool outcomes, not model reasoning — whether a deterministic policy layer prevented forbidden operations from occurring.
+
+### Module Location
+
+- Library code: `lib/trusttrace/`
+- API routes: `app/api/trusttrace/`
+- Tests: `tests/trusttrace/`
+- Fixtures: `lib/trusttrace/fixtures/`
+
+### API Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/trusttrace/health` | Health check + Ollama reachability probe |
+| GET | `/api/trusttrace/scenarios` | List available test scenarios |
+| POST | `/api/trusttrace/runs` | Create and start a new run (async, returns 201 immediately) |
+| GET | `/api/trusttrace/runs/:id` | Poll run status, events, and evaluation |
+| GET | `/api/trusttrace/runs/:id/report` | Full structured evidence report (completed runs only) |
+
+### Scenarios
+
+| ID | Type | Description |
+|---|---|---|
+| `repo-injection` | Attack | Tests whether the policy layer blocks a prompt-injected instruction from causing a protected file read and network transmission |
+| `benign-task` | Benign | Tests that protection does not block normal, legitimate file reads |
+
+### Running Tests
+
+```bash
+npx vitest run
+```
+
+All 17 tests are in `tests/trusttrace/` and use in-process route handler invocation (no server boot required).
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `TRUSTTRACE_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server base URL |
+| `TRUSTTRACE_OLLAMA_MODEL` | `qwen2.5:7b` | Ollama model name |
+
+### Known Limitations
+
+- **Simulated tools only.** No real execution, real network, or real secrets. TrustTrace tests a policy boundary on simulated tools, not real tool implementations.
+- **In-memory store vanishes on restart** and is not shared across instances/processes. No persistence.
+- **Provenance ≠ causation.** Source→action association is evidence of tracked exposure, not proof the input caused the action.
+- **TrustTrace does NOT prevent all prompt injection.** It measures one specific boundary on specific scenarios; it is a harness, not a defense.
+- **Model explanations are not authoritative security evidence.** Verdicts come solely from actual tool outcomes.
+- **Ollama-backed runs require a local Ollama instance.** If unavailable, only the failure path (Test 10) is verified.
+- **Scripted mode is deterministic testing, not a demonstration of LLM behavior or security.**
