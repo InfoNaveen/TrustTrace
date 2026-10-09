@@ -20,7 +20,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#0a0e1a] text-gray-100 overflow-hidden">
+      <body className="min-h-screen bg-brand-dark text-gray-100 overflow-hidden">
         <ScanProvider>
           <div className="flex h-screen overflow-hidden relative">
             <Sidebar 

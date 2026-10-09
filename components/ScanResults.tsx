@@ -87,7 +87,7 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6">
+    <div className="bg-brand-surface rounded-lg p-6">
       <h2 className="text-2xl font-bold mb-6">Scan Results</h2>
       
       {findings.length > 0 ? (
@@ -96,8 +96,8 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
           
           {/* Vulnerability Table */}
           <div className="overflow-x-auto mb-6">
-            <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
-              <thead className="bg-gray-600">
+            <table className="min-w-full bg-brand-surface/60 rounded-lg overflow-hidden">
+              <thead className="bg-brand-surface/80">
                 <tr>
                   <th className="py-3 px-4 text-left">Severity</th>
                   <th className="py-3 px-4 text-left">File</th>
@@ -107,7 +107,7 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
               </thead>
               <tbody>
                 {findings.map((finding, index) => (
-                  <tr key={index} className="border-b border-gray-600 hover:bg-gray-600">
+                  <tr key={index} className="border-b border-brand-primary/20 hover:bg-brand-surface/40">
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(finding.severity)} text-white`}>
                         {finding.severity.toUpperCase()}
@@ -125,12 +125,12 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
           {/* Detailed Findings */}
           <div className="space-y-4">
             {findings.map((finding, index) => (
-              <div key={index} className="bg-gray-700 rounded-lg p-4">
+              <div key={index} className="bg-brand-surface/60 rounded-lg p-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getSeverityColor(finding.severity)}`}></span>
                     <span className="font-medium">{finding.type}</span>
-                    <span className="ml-2 text-xs bg-gray-600 px-2 py-1 rounded">
+                    <span className="ml-2 text-xs bg-brand-primary/20 px-2 py-1 rounded">
                       {finding.severity.toUpperCase()}
                     </span>
                   </div>
@@ -138,7 +138,7 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
                     {finding.file}:{finding.line}
                   </div>
                 </div>
-                <div className="mt-2 text-gray-300 font-mono text-sm p-2 bg-gray-900 rounded overflow-x-auto">
+                <div className="mt-2 text-gray-300 font-mono text-sm p-2 bg-brand-dark/50 rounded overflow-x-auto">
                   {finding.snippet}
                 </div>
               </div>
@@ -158,8 +158,8 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
           
           {/* Patch Feedback Table */}
           <div className="overflow-x-auto mb-6">
-            <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
-              <thead className="bg-gray-600">
+            <table className="min-w-full bg-brand-surface/60 rounded-lg overflow-hidden">
+              <thead className="bg-brand-surface/80">
                 <tr>
                   <th className="py-3 px-4 text-left">Status</th>
                   <th className="py-3 px-4 text-left">File</th>
@@ -168,7 +168,7 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
               </thead>
               <tbody>
                 {patches.map((patch, index) => (
-                  <tr key={index} className="border-b border-gray-600 hover:bg-gray-600">
+                  <tr key={index} className="border-b border-brand-primary/20 hover:bg-brand-surface/40">
                     <td className="py-3 px-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
                         ✅ Patch Applied
@@ -191,9 +191,9 @@ export default function ScanResults({ findings, patches, projectId }: ScanResult
           {/* Detailed Patches */}
           <div className="space-y-4">
             {patches.map((patch, index) => (
-              <div key={index} className="bg-blue-900/30 rounded-lg p-4">
-                <div className="font-medium text-blue-300">{patch.file}</div>
-                <div className="mt-2 text-gray-300 font-mono text-sm p-2 bg-gray-900 rounded">
+              <div key={index} className="bg-brand-secondary/10 rounded-lg p-4">
+                <div className="font-medium text-brand-secondary">{patch.file}</div>
+                <div className="mt-2 text-gray-300 font-mono text-sm p-2 bg-brand-dark/50 rounded">
                   {patch.change}
                 </div>
               </div>

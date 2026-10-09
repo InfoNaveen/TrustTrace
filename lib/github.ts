@@ -13,14 +13,41 @@ export interface GitHubCommitOptions {
 }
 
 /**
+ * SECURITY: Validate GitHub token format before use
+ * Prevents token leakage and ensures token is properly formatted
+ */
+function validateGitHubToken(token: string): void {
+  if (!token || typeof token !== 'string') {
+    throw new Error('Invalid GitHub token provided');
+  }
+
+  // GitHub tokens are typically 40+ characters
+  if (token.length < 20) {
+    throw new Error('Invalid GitHub token format');
+  }
+
+  // Warn if token appears to be exposed in logs (don't log it)
+  if (token.includes('\n') || token.includes(' ')) {
+    throw new Error('Invalid GitHub token format');
+  }
+}
+
+/**
  * Commit files to a GitHub repository
  * This is a full implementation that creates blobs, trees, commits, and PRs
  */
 export async function commitToGitHub(options: GitHubCommitOptions): Promise<{ prUrl?: string }> {
   try {
     // Validate inputs
-    if (!options.token || !options.owner || !options.repo || !options.branch || !options.message || !options.files) {
+    if (!options.owner || !options.repo || !options.branch || !options.message || !options.files) {
       throw new Error('Missing required parameters for GitHub commit');
+    }
+
+    // Validate token separately to avoid logging it
+    try {
+      validateGitHubToken(options.token);
+    } catch (tokenError) {
+      throw tokenError;
     }
 
     const octokit = new Octokit({ auth: options.token });

@@ -63,7 +63,7 @@ function validateEnvVars(requireServiceRole = false) {
   }
 }
 
-// Browser-side Supabase client
+// Browser-side Supabase client (SAFE - uses ANON_KEY only)
 export function supabaseBrowser() {
   validateEnvVars(false);
 
@@ -75,9 +75,28 @@ export function supabaseBrowser() {
   return supabase;
 }
 
-// Service role client for admin operations (bypasses RLS)
+/**
+ * SECURITY: Service role client for admin operations (bypasses RLS)
+ * 
+ * CRITICAL: This client must ONLY be used in:
+ * - API routes (app/api/*)
+ * - Never in client-side code
+ * - Never in browser components
+ * - Never with NEXT_PUBLIC_ prefixed variables
+ * 
+ * @throws {Error} If called with admin=false to encourage proper usage patterns
+ */
 export function supabaseServiceRole() {
   validateEnvVars(true);
+
+  // SECURITY: Guard against accidental client-side usage
+  if (typeof window !== 'undefined') {
+    throw new Error(
+      'Cannot use service role client on the client side. ' +
+      'This client bypasses Row Level Security and must never be accessible to browsers. ' +
+      'Use supabaseBrowser() or create a server action instead.'
+    );
+  }
 
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

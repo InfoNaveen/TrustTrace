@@ -1,3 +1,21 @@
+/**
+ * WARNING: This module contains offensive security tooling for demo/research use only.
+ * Never invoke against systems you do not own. Restricted to authorized environments only.
+ * Unauthorized use of these tools against third-party systems is illegal.
+ */
+
+// SECURITY: Gate offensive engine behind environment flag
+// Note: Skip during build/static generation (when vercel is the builder)
+const isBuildTime = process.env.VERCEL_ENV === undefined && !process.env.GITHUB_ACTIONS;
+
+if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_RED_TEAM && !isBuildTime) {
+  throw new Error(
+    'Red-team engine is disabled in production. ' +
+    'Set ENABLE_RED_TEAM=true in environment variables to enable. ' +
+    'This is a security-sensitive feature requiring explicit authorization.'
+  );
+}
+
 import { Finding, Patch, ScanResult } from '@/lib/sentinel';
 import { callLLM } from '@/lib/llm';
 import fs from 'fs/promises';

@@ -88,18 +88,18 @@ export default function UploadForm({ onUploadStart, onUploadComplete, onScanComp
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 mb-8">
+    <div className="bg-brand-surface rounded-lg p-6 mb-8">
       <h2 className="text-2xl font-bold mb-6">Upload Code for Scanning</h2>
       
       <div className="flex space-x-4 mb-6">
         <button
-          className={`px-4 py-2 rounded-md ${uploadMethod === 'zip' ? 'bg-blue-600' : 'bg-gray-700'}`}
+          className={`px-4 py-2 rounded-md ${uploadMethod === 'zip' ? 'bg-brand-secondary' : 'bg-brand-surface/60'}`}
           onClick={() => setUploadMethod('zip')}
         >
           Upload ZIP File
         </button>
         <button
-          className={`px-4 py-2 rounded-md ${uploadMethod === 'github' ? 'bg-blue-600' : 'bg-gray-700'}`}
+          className={`px-4 py-2 rounded-md ${uploadMethod === 'github' ? 'bg-brand-secondary' : 'bg-brand-surface/60'}`}
           onClick={() => setUploadMethod('github')}
         >
           GitHub Repository
@@ -114,7 +114,7 @@ export default function UploadForm({ onUploadStart, onUploadComplete, onScanComp
               type="file"
               accept=".zip"
               onChange={handleFileChange}
-              className="w-full p-2 bg-gray-700 rounded-md border border-gray-600"
+              className="w-full p-2 bg-brand-surface/60 rounded-md border border-brand-primary/20"
               required
             />
           </div>
@@ -127,7 +127,7 @@ export default function UploadForm({ onUploadStart, onUploadComplete, onScanComp
                 value={repoUrl}
                 onChange={(e) => setRepoUrl(e.target.value)}
                 placeholder="https://github.com/user/repo"
-                className="w-full p-2 bg-gray-700 rounded-md border border-gray-600"
+                className="w-full p-2 bg-brand-surface/60 rounded-md border border-brand-primary/20"
                 required
               />
             </div>
@@ -138,7 +138,7 @@ export default function UploadForm({ onUploadStart, onUploadComplete, onScanComp
                 value={githubToken}
                 onChange={(e) => setGithubToken(e.target.value)}
                 placeholder="ghp_********"
-                className="w-full p-2 bg-gray-700 rounded-md border border-gray-600"
+                className="w-full p-2 bg-brand-surface/60 rounded-md border border-brand-primary/20"
               />
             </div>
           </>
@@ -146,7 +146,7 @@ export default function UploadForm({ onUploadStart, onUploadComplete, onScanComp
 
         <button
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition duration-300"
+          className="w-full bg-brand-secondary hover:bg-brand-secondary/80 text-white font-bold py-3 px-4 rounded-md transition duration-300"
         >
           Upload and Scan
         </button>

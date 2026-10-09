@@ -8,6 +8,7 @@ import { getScenario } from '@/lib/trusttrace/scenarios';
 import { createProvenanceRegistry, sha256 } from '@/lib/trusttrace/provenance';
 import { FAKE_SECRET_RE } from '@/lib/trusttrace/events';
 import { executeAction as doExecuteAction } from '@/lib/trusttrace/tools';
+import { checkHealth, OllamaUnreachableError } from '@/lib/trusttrace/ollama-adapter';
 import { createAgent } from '@/lib/trusttrace/agent';
 import { evaluate } from '@/lib/trusttrace/evaluation';
 
@@ -199,6 +200,16 @@ export async function executeRun(runId: string): Promise<void> {
             model: record.ollama_config.model,
           }
         : undefined;
+
+    // Pre-flight health check for Ollama mode — fail fast, no silent fallback
+    if (record.agent_mode === 'ollama' && ollamaConfig) {
+      const health = await checkHealth(ollamaConfig.baseUrl, ollamaConfig.model, { timeoutMs: 5000 });
+      if (!health.reachable) {
+        throw new OllamaUnreachableError(
+          `Ollama not reachable at ${ollamaConfig.baseUrl}: ${health.error ?? 'unknown error'}`
+        );
+      }
+    }
 
     const agent = createAgent(record.agent_mode, {
       executeAction: doExecuteAction,

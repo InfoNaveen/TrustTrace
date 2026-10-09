@@ -3,15 +3,26 @@ import { runOrchestrator } from '@/lib/orchestrator';
 import { supabaseServiceRole } from '@/lib/supabase';
 import { getAuthenticatedUser } from '@/lib/auth-utils';
 import { prepareProjectFromStorage, cleanupProjectDir } from '@/lib/project-utils';
+import { createErrorResponse } from '@/lib/api-error';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   let projectDir: string | null = null;
 
   try {
-    // Authenticate user
+    // SECURITY: Authenticate user
     const user = await getAuthenticatedUser(request);
     if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // SECURITY: Rate limit per user (5 scans per hour)
+    const isAllowed = checkRateLimit(user.id, 5, 60 * 60 * 1000);
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Maximum 5 scans per hour.' },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();
@@ -19,12 +30,12 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!projectId) {
-      return NextResponse.json({ success: false, error: 'Project ID is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
     const supabase = supabaseServiceRole();
 
-    // Verify project ownership
+    // SECURITY: Verify project ownership - never trust user-supplied projectId alone
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('*')
@@ -33,7 +44,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (projectError || !project) {
-      return NextResponse.json({ success: false, error: 'Project not found or access denied' }, { status: 404 });
+      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 });
     }
 
     // Prepare project from storage
@@ -46,10 +57,7 @@ export async function POST(request: NextRequest) {
       try {
         projectDir = await prepareProjectFromStorage(projectId, generatedPath);
       } catch (genError: any) {
-        return NextResponse.json({ 
-          success: false, 
-          error: `Failed to load project: ${error.message}` 
-        }, { status: 500 });
+        return createErrorResponse(error, 'Failed to load project', 500);
       }
     }
 
@@ -58,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Validate orchestrator result
     if (!result || !result.findings || !result.patches) {
-      return NextResponse.json({ success: false, error: 'Invalid orchestrator result' }, { status: 500 });
+      return NextResponse.json({ error: 'Invalid scan result' }, { status: 500 });
     }
 
     // Count severities
@@ -82,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     if (scanError) {
       console.error('Error creating scan:', scanError);
-      return NextResponse.json({ success: false, error: 'Failed to create scan record' }, { status: 500 });
+      return createErrorResponse(scanError, 'Failed to create scan record', 500);
     }
 
     // Store vulnerabilities
@@ -104,7 +112,7 @@ export async function POST(request: NextRequest) {
 
       if (vulnError) {
         console.error('Error storing vulnerabilities:', vulnError);
-        return NextResponse.json({ success: false, error: 'Failed to store vulnerabilities' }, { status: 500 });
+        return createErrorResponse(vulnError, 'Failed to store vulnerabilities', 500);
       }
 
       // Create a map for patch association
@@ -159,15 +167,16 @@ export async function POST(request: NextRequest) {
       patches: result.patches,
       scanId: scan?.id
     });
-  } catch (error: any) {
-    console.error('Scan error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || 'Internal server error' 
-    }, { status: 500 });
+  } catch (error) {
+    return createErrorResponse(error, 'An internal error occurred', 500);
   } finally {
+    // Clean up project directory
     if (projectDir) {
-      await cleanupProjectDir(projectDir);
+      try {
+        await cleanupProjectDir(projectDir);
+      } catch (cleanupError) {
+        console.warn('Failed to clean up project directory:', cleanupError);
+      }
     }
   }
 }

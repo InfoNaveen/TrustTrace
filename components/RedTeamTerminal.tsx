@@ -128,11 +128,11 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+    <div className="bg-brand-surface rounded-lg shadow-lg border border-brand-primary/20 overflow-hidden">
+      <div className="bg-brand-surface/80 px-4 py-3 border-b border-brand-primary/20 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Terminal className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-          <h3 className="font-medium text-gray-900 dark:text-white">Red-Team Terminal</h3>
+          <Terminal className="w-5 h-5 text-brand-secondary" />
+          <h3 className="font-medium text-white">Red-Team Terminal</h3>
           <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-full">
             OFFENSIVE MODE
           </span>
@@ -148,7 +148,7 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
           </button>
           <button
             onClick={clearLogs}
-            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            className="inline-flex items-center px-3 py-1.5 border border-brand-primary/20 text-xs font-medium rounded text-gray-300 bg-brand-surface/50 hover:bg-brand-surface focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-secondary"
           >
             <RotateCcw className="w-3 h-3 mr-1" />
             Clear
@@ -156,12 +156,12 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
         </div>
       </div>
 
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="flex border-b border-brand-primary/20">
         <button
           className={`flex-1 py-2 px-4 text-sm font-medium ${
             activeTab === 'logs'
-              ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              ? 'border-b-2 border-brand-secondary text-brand-secondary'
+              : 'text-gray-500 hover:text-gray-300'
           }`}
           onClick={() => setActiveTab('logs')}
         >
@@ -170,8 +170,8 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
         <button
           className={`flex-1 py-2 px-4 text-sm font-medium ${
             activeTab === 'results'
-              ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              ? 'border-b-2 border-brand-secondary text-brand-secondary'
+              : 'text-gray-500 hover:text-gray-300'
           }`}
           onClick={() => setActiveTab('results')}
         >
@@ -198,8 +198,8 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
                 key={log.id} 
                 className={`mb-3 p-3 rounded border ${
                   log.success 
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
-                    : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    ? 'bg-red-900/20 border-red-500/30' 
+                    : 'bg-green-900/20 border-green-500/30'
                 }`}
               >
                 <div className="flex items-start">
@@ -217,7 +217,7 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
                             EXPLOIT SUCCESSFUL
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-900/40 text-green-300">
                             BLOCKED
                           </span>
                         )}
@@ -229,7 +229,7 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
                     <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">
                       <div className="font-medium">Target: {log.target}</div>
                       <div>Payload: {log.payload}</div>
-                      <div className="mt-1 text-sm text-gray-800 dark:text-gray-200 font-mono bg-gray-100 dark:bg-gray-700/50 p-2 rounded">
+                      <div className="mt-1 text-sm text-gray-200 font-mono bg-brand-dark/50 p-2 rounded">
                         {log.output}
                       </div>
                     </div>
@@ -242,9 +242,9 @@ const RedTeamTerminal: React.FC<RedTeamTerminalProps> = ({ projectPath, onScanCo
       </div>
 
       {isScanning && (
-        <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-gray-700 flex items-center">
+        <div className="px-4 py-3 bg-blue-900/20 border-t border-brand-primary/20 flex items-center">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-          <span className="text-sm text-blue-700 dark:text-blue-300">
+          <span className="text-sm text-blue-300">
             Running dynamic exploit validation against your code...
           </span>
         </div>

@@ -145,7 +145,7 @@ export async function chatWithTools(
   tools: OllamaTool[],
   opts?: { timeoutMs?: number; format?: string }
 ): Promise<OllamaChatResponse> {
-  const timeoutMs = opts?.timeoutMs ?? 60000;
+  const timeoutMs = opts?.timeoutMs ?? 120000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -197,13 +197,42 @@ export async function chatWithTools(
     throw new OllamaMalformedResponseError('Ollama response missing .message field');
   }
 
+  const rawToolCalls = (msg as Record<string, unknown>).tool_calls;
+
+  // Normalize tool_calls: parse arguments if Ollama returns them as a JSON string
+  let normalizedToolCalls: OllamaToolCall[] | undefined;
+  if (Array.isArray(rawToolCalls)) {
+    normalizedToolCalls = rawToolCalls.map((tc: unknown) => {
+      const tcObj = tc as Record<string, unknown>;
+      const fn = tcObj.function as Record<string, unknown> | undefined;
+      if (!fn) return tc as OllamaToolCall;
+      const rawArgs = fn.arguments;
+      let parsedArgs: Record<string, unknown>;
+      if (typeof rawArgs === 'string') {
+        try {
+          parsedArgs = JSON.parse(rawArgs) as Record<string, unknown>;
+        } catch {
+          parsedArgs = {};
+        }
+      } else if (rawArgs && typeof rawArgs === 'object') {
+        parsedArgs = rawArgs as Record<string, unknown>;
+      } else {
+        parsedArgs = {};
+      }
+      return {
+        function: {
+          name: (fn.name as string) ?? '',
+          arguments: parsedArgs,
+        },
+      };
+    });
+  }
+
   return {
     message: {
       role: ((msg as Record<string, unknown>).role as string) ?? 'assistant',
       content: ((msg as Record<string, unknown>).content as string) ?? '',
-      tool_calls: (msg as Record<string, unknown>).tool_calls as
-        | OllamaToolCall[]
-        | undefined,
+      tool_calls: normalizedToolCalls,
     },
   };
 }

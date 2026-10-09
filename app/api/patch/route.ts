@@ -5,13 +5,24 @@ import AdmZip from 'adm-zip';
 import { supabaseServiceRole } from '@/lib/supabase';
 import { getAuthenticatedUser } from '@/lib/auth-utils';
 import { applyPatches } from '@/lib/patcher';
+import { createErrorResponse } from '@/lib/api-error';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user
+    // SECURITY: Authenticate user
     const user = await getAuthenticatedUser(request);
     if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // SECURITY: Rate limit per user (10 patch exports per hour)
+    const isAllowed = checkRateLimit(user.id, 10, 60 * 60 * 1000);
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Maximum 10 patch exports per hour.' },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();
@@ -19,12 +30,12 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!projectId) {
-      return NextResponse.json({ success: false, error: 'Project ID is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
     const supabase = supabaseServiceRole();
 
-    // Verify project ownership
+    // SECURITY: Verify project ownership - never trust user-supplied projectId alone
     const { data: project } = await supabase
       .from('projects')
       .select('id')
@@ -33,7 +44,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!project) {
-      return NextResponse.json({ success: false, error: 'Project not found or access denied' }, { status: 404 });
+      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 });
     }
 
     // For export, we'll need to download from storage
@@ -65,7 +76,7 @@ export async function POST(request: NextRequest) {
         
         if (timelineError) {
           console.error('Error logging timeline event:', timelineError);
-          return NextResponse.json({ success: false, error: 'Failed to log export event' }, { status: 500 });
+          return createErrorResponse(timelineError, 'Failed to export patches', 500);
         }
         
         // @ts-ignore
@@ -77,7 +88,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (zipError) {
         console.error('Error creating ZIP file:', zipError);
-        return NextResponse.json({ success: false, error: 'Failed to create ZIP file' }, { status: 500 });
+        return createErrorResponse(zipError, 'Failed to create ZIP file', 500);
       }
     } else {
       // Get patches from database by joining with scans and vulnerabilities tables
@@ -91,7 +102,7 @@ export async function POST(request: NextRequest) {
       
       if (patchesError) {
         console.error('Error fetching patches:', patchesError);
-        return NextResponse.json({ success: false, error: 'Failed to fetch patches' }, { status: 500 });
+        return createErrorResponse(patchesError, 'Failed to fetch patches', 500);
       }
       
       // Convert database patches to patch objects
@@ -118,7 +129,7 @@ export async function POST(request: NextRequest) {
       
       if (timelineError) {
         console.error('Error logging timeline event:', timelineError);
-        return NextResponse.json({ success: false, error: 'Failed to log patch event' }, { status: 500 });
+        return createErrorResponse(timelineError, 'Failed to log patch event', 500);
       }
       
       return NextResponse.json({ 
@@ -128,7 +139,6 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('Patch error:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    return createErrorResponse(error, 'An internal error occurred', 500);
   }
 }
