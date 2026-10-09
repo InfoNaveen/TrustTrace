@@ -382,12 +382,58 @@ npx vitest run
 
 All 17 tests are in `tests/trusttrace/` and use in-process route handler invocation (no server boot required).
 
-### Environment Variables
+### Scripted Demo (exact curl commands)
+
+```bash
+# 1. Start dev server
+npm run dev
+
+# 2. Health check
+curl http://localhost:3000/api/trusttrace/health
+
+# 3. List scenarios
+curl http://localhost:3000/api/trusttrace/scenarios
+
+# 4. Start a repo-injection run (returns run_id)
+curl -X POST http://localhost:3000/api/trusttrace/runs \
+  -H "Content-Type: application/json" \
+  -d '{"scenario_id":"repo-injection","protection_enabled":true,"agent_mode":"scripted"}'
+
+# 5. Poll run status (replace <run_id>)
+curl http://localhost:3000/api/trusttrace/runs/<run_id>
+
+# 6. Get full report once completed
+curl http://localhost:3000/api/trusttrace/runs/<run_id>/report
+
+# 7. Benign task (should return verdict=passed)
+curl -X POST http://localhost:3000/api/trusttrace/runs \
+  -H "Content-Type: application/json" \
+  -d '{"scenario_id":"benign-task","protection_enabled":true,"agent_mode":"scripted"}'
+
+# 8. 404 on unknown run
+curl http://localhost:3000/api/trusttrace/runs/00000000-0000-0000-0000-000000000000/report
+```
+
+### Running with Ollama
+
+Requires a local [Ollama](https://ollama.ai) instance with `qwen2.5:7b` pulled:
+
+```bash
+ollama pull qwen2.5:7b
+```
+
+Set environment variables (or add to `.env.local`):
 
 | Variable | Default | Description |
 |---|---|---|
 | `TRUSTTRACE_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server base URL |
 | `TRUSTTRACE_OLLAMA_MODEL` | `qwen2.5:7b` | Ollama model name |
+
+Then POST a run with `"agent_mode":"ollama"`. The policy layer enforces the same boundaries regardless of agent mode. If Ollama is unreachable, the run completes with `status:"failed"` (this is the path covered by Test 10).
+
+### Full Handoff
+
+See [TRUSTTRACE-HANDOFF.md](./TRUSTTRACE-HANDOFF.md) for complete architecture decisions, API schemas, test results, and known limitations.
 
 ### Known Limitations
 
@@ -398,3 +444,6 @@ All 17 tests are in `tests/trusttrace/` and use in-process route handler invocat
 - **Model explanations are not authoritative security evidence.** Verdicts come solely from actual tool outcomes.
 - **Ollama-backed runs require a local Ollama instance.** If unavailable, only the failure path (Test 10) is verified.
 - **Scripted mode is deterministic testing, not a demonstration of LLM behavior or security.**
+- **Single verdict per run.** Baseline comparison requires two separate runs (protection_enabled=true vs false).
+- **Fake secrets only.** The protected file contains a placeholder value — no real credentials.
+- **Temp workspaces may leak on crash** (cleanup is in a `finally` block, not a separate process).
