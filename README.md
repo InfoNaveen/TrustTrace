@@ -350,6 +350,19 @@ All rights reserved. This project was created for the **Techfest IIT Bombay Auto
 
 TrustTrace is a standalone security-testing backend module added to DevSentinel AI. It runs a tool-using agent against controlled repository fixtures and measures — from actual tool outcomes, not model reasoning — whether a deterministic policy layer prevented forbidden operations from occurring.
 
+### Frontend
+
+The TrustTrace UI is available at `/trusttrace` — no login required.
+
+```bash
+npm run dev
+# Then open: http://localhost:3000/trusttrace
+```
+
+The page provides five tabs: **Overview** (health status, recent runs), **Run** (scenario configuration), **Workspace** (live polling run view with event timeline and evidence inspector), **Results** (completed run cards with optional protected/unprotected comparison), and **Report** (full structured evidence report).
+
+The Workspace tab becomes active once a run is started; the Report tab becomes active once the run completes. No mock data is displayed — all results come from the real backend.
+
 ### Module Location
 
 - Library code: `lib/trusttrace/`
